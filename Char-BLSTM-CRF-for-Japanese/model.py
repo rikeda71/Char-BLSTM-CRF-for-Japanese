@@ -9,40 +9,39 @@ class BLSTMCRF(nn.Module):
     CUDA = torch.cuda.is_available()
 
     def __init__(self, num_labels: int, hidden_size: int,
-                 batch_size: int, dropout_rate: int, pad_idx: int,
-                 wordemb: np.ndarray, charemb: np.ndarray):
+                 dropout_rate: int, pad_idx: int,
+                 wordemb_dim: int, charemb_dim: int):
         """
 
         :param num_labels: number of label
         :param hidden_size: size of hidden state
-        :param batch_size: size of batch
         :param dropout_rate: dropout rate (0.0 <= dropout_rate < 1.0)
         :param pad_idx: index of padding character in word
-        :param wordemb: word embedding
-        :param charemb: character embedding
+        :param wordemb_dim: dimension of word embedding
+        :param charemb_dim: dimension of character embedding
         """
 
         super().__init__()
-        self.blstm = BLSTM(num_labels, hidden_size, batch_size, dropout_rate, pad_idx, wordemb, charemb)
+        self.blstm = BLSTM(num_labels, hidden_size, dropout_rate, pad_idx, wordemb_dim, charemb_dim)
         self.crf = CRF(num_labels)
         self = self.cuda() if BLSTM.CUDA else self
 
-    def forward(self, x: Dict[str, torch.LongTensor], y: torch.LongTensor) -> torch.FloatTensor:
+    def forward(self, x: Dict[str, torch.Tensor], y: torch.Tensor, mask: torch.Tensor) -> torch.Tensor:
         """
 
         :param x: word and character embedding
                    {'word': embedding of word including character, 'char': character embedding}
         :param y: labels of sequence in batch
+        :param mask: masking of sequence (1 or 0)
         :return: score of Bidirectional LSTM CRF forward
         """
 
         # paddingの位置を導出
-        mask = x['char'].data.gt(0).float()
-        h = self.lstm.forward(x, mask)
+        h = self.blstm.forward(x, mask)
         score = self.crf.forward(h, y, mask)
         return score
 
-    def decode(self, x: Dict[str, torch.LongTensor]) -> List[int]:
+    def decode(self, x: Dict[str, torch.Tensor], mask: torch.Tensor) -> List[int]:
         """
 
         :param x: word and character embedding
@@ -50,8 +49,7 @@ class BLSTMCRF(nn.Module):
         :return: labels of x
         """
 
-        mask = x['char'].data.gt(0).float()
-        h = self.lstm.forward(x, mask)
+        h = self.blstm.forward(x, mask)
         labels = self.crf.viterbi_decode(h, mask)
         return labels
 
@@ -59,39 +57,26 @@ class BLSTMCRF(nn.Module):
 class BLSTM(nn.Module):
     CUDA = torch.cuda.is_available()
 
-    def __init__(self, num_labels: int, hidden_size:int, 
-                 batch_size: int, dropout_rate: int, pad_idx: int,
-                 wordemb: np.ndarray, charemb: np.ndarray):
+    def __init__(self, num_labels: int, hidden_size: int,
+                 dropout_rate: int, pad_idx: int,
+                 wordemb_dim: int, charemb_dim: int):
         """
 
         :param num_labels: number of label
         :param hidden_size: size of hidden state
-        :param batch_size: size of batch
         :param dropout_rate: dropout rate (0.0 <= dropout_rate < 1.0)
         :param pad_idx: index of padding character in word
-        :param wordemb: word embedding
-        :param charemb: character embedding
+        :param wordemb_dim: dimension of word embedding
+        :param charemb_dim: dimension of character embedding
         """
 
         super().__init__()
 
         self.hidden = None
         self.hidden_size = hidden_size
-        self.batch_size = batch_size
-        # 単語分散表現のセッティング
-        # word embedding setting
-        wordvocab_size, wordembed_size = wordemb.shape
-        self.wordembed = nn.Embedding(wordvocab_size, wordembed_size, padding_idx=pad_idx)
-        self.wordembed.weight = nn.Parameter(torch.from_numpy(wordemb))
-
-        # 文字分散表現のセッティング
-        # char embedding setting
-        charvocab_size, charembed_size = charemb.shape
-        self.charembed = nn.Embedding(charvocab_size, charembed_size, padding_idx=pad_idx)
-        self.charembed.weight = nn.Parameter(torch.from_numpy(charemb))
 
         self.lstm = nn.LSTM(
-            input_size=wordembed_size + charembed_size,
+            input_size=wordemb_dim + charemb_dim,
             hidden_size=hidden_size // 2,
             num_layers=1,
             bias=True,
@@ -102,34 +87,31 @@ class BLSTM(nn.Module):
 
         self.out = nn.Linear(hidden_size, num_labels)
 
-    def init_hidden(self) -> Tuple[torch.FloatTensor]:
+    def init_hidden(self, batch_size) -> Tuple[torch.Tensor]:
         """
         initialize hidden state
         :return: (hidden state, cell of LSTM)
         """
 
-        h = self.zeros(2, self.batch_size, self.hidden_size // 2)
-        c = self.zeros(2, self.batch_size, self.hidden_size // 2)
+        h = self.zeros(2, batch_size, self.hidden_size // 2)
+        c = self.zeros(2, batch_size, self.hidden_size // 2)
         return h, c
 
-    def forward(self, x: Dict[str, np.ndarray], mask: torch.FloatTensor):
+    def forward(self, x: Dict[str, np.ndarray], mask: torch.Tensor):
         """
 
         :param x: word and character embedding
                    {'word': embedding of word including character, 'char': character embedding}
+                   (batch_size, sequence_len, embedding_size)
         :param mask: masking of sequence (1 or 0)
         :return: score of LSTM forward
         """
 
-        self.hidden = self.init_hidden()
-        word_x = self.wordembed(x['word'])
-        char_x = self.charembed(x['char'])
-        x = torch.cat((word_x, char_x), 0)
-        x = nn.utils.rnn.pack_padded_sequence(x, mask.sum(1).int(), batch_first=True)
+        batch_size = x['word'].shape[0]
+        self.hidden = self.init_hidden(batch_size)
+        x = torch.cat((x['word'], x['char']), 2)
         h, _ = self.lstm(x, self.hidden)
-        h, _ = nn.utils.rnn.pad_packed_sequence(h, batch_first=True)
         h = self.out(h)
-        h *= mask.unsqueeze(-1)
         return h
 
     @staticmethod
