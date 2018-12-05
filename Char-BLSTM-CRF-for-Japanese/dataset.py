@@ -42,7 +42,9 @@ class Dataset():
     def return_batch(self, batch_size: int):
         return data.BucketIterator(dataset=self.dataset,
                                    batch_size=batch_size,
-                                   sort_key=lambda x: len(x.label))
+                                   sort=True,
+                                   sort_key=lambda x: len(x.char),
+                                   repeat=False)
 
     def return_embedding_dim(self) -> Dict[str, int]:
         char_dim = self.CHAR.vocab.vectors.shape[1]
