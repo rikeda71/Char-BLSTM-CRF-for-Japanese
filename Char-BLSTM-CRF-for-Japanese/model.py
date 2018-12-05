@@ -9,7 +9,7 @@ class BLSTMCRF(nn.Module):
     CUDA = torch.cuda.is_available()
 
     def __init__(self, num_labels: int, hidden_size: int,
-                 dropout_rate: int, pad_idx: int,
+                 dropout_rate: float, pad_idx: int,
                  wordemb_dim: int, charemb_dim: int):
         """
 
@@ -39,7 +39,7 @@ class BLSTMCRF(nn.Module):
         # paddingの位置を導出
         h = self.blstm.forward(x, mask)
         score = self.crf.forward(h, y, mask)
-        return score
+        return -torch.mean(score)
 
     def decode(self, x: Dict[str, torch.Tensor], mask: torch.Tensor) -> List[int]:
         """
@@ -52,6 +52,15 @@ class BLSTMCRF(nn.Module):
         h = self.blstm.forward(x, mask)
         labels = self.crf.viterbi_decode(h, mask)
         return labels
+
+    def load(self, model_path: str) -> None:
+        """
+        load training model
+        :param model_path: path of model file (.pth)
+        :return: None
+        """
+
+        self.load_state_dict(torch.load(model_path))
 
 
 class BLSTM(nn.Module):
@@ -110,8 +119,11 @@ class BLSTM(nn.Module):
         batch_size = x['word'].shape[0]
         self.hidden = self.init_hidden(batch_size)
         x = torch.cat((x['word'], x['char']), 2)
+        x = nn.utils.rnn.pack_padded_sequence(x, mask.sum(1).int(), batch_first=True)
         h, _ = self.lstm(x, self.hidden)
+        h, _ = torch.nn.utils.rnn.pad_packed_sequence(h, batch_first=True)
         h = self.out(h)
+        h *= mask.unsqueeze(-1)
         return h
 
     @staticmethod
