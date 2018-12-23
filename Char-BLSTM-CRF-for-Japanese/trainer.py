@@ -2,7 +2,6 @@ import torch
 import matplotlib.pyplot as plt
 from model import BLSTMCRF
 from dataset import Dataset
-from seqeval.metrics import f1_score
 
 
 class Trainer():
@@ -101,29 +100,3 @@ class Trainer():
         ax1.set_ylabel('loss')
         ax2.set_ylabel('F-measure')
         plt.savefig('result.png')
-
-    def validate(self) -> float:
-        """
-        validate for test dataset
-        :return: f-measure of test dataset
-        """
-
-        iterator = self.test.return_batch(self.batch_size)
-        predict = []
-        answer = []
-        # テストセットに対して，ラベルの予測を行う
-        for i, data in enumerate(iterator):
-            with torch.no_grad():
-                word = self.dataset.WORD.vocab.vectors[data.word]
-                char = self.dataset.CHAR.vocab.vectors[data.char]
-                mask = data.word != 1
-                mask = mask.float()
-                x = {'word': word, 'char': char}
-                decode = self.model.decode(x, mask)
-
-            for pred, ans in zip(decode, data.label):
-                answer.append([self.dataset.LABEL.vocab.itos[i] for i in ans[:len(pred)]])
-                predict.append([self.dataset.LABEL.vocab.itos[i] for i in pred])
-
-        # F値を返す
-        return f1_score(answer, predict)
