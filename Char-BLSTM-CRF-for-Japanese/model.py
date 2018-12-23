@@ -83,11 +83,12 @@ class BLSTM(nn.Module):
 
         self.hidden = None
         self.hidden_size = hidden_size
+        self.num_layers = 2
 
         self.lstm = nn.LSTM(
             input_size=wordemb_dim + charemb_dim,
             hidden_size=hidden_size // 2,
-            num_layers=1,
+            num_layers=2,
             bias=True,
             dropout=dropout_rate,
             batch_first=True,
@@ -102,8 +103,10 @@ class BLSTM(nn.Module):
         :return: (hidden state, cell of LSTM)
         """
 
-        h = self.zeros(2, batch_size, self.hidden_size // 2)
-        c = self.zeros(2, batch_size, self.hidden_size // 2)
+        # hidden state size is (num_layers * 2, batch_size, hidden_size / 2)
+        # because this class use bidirectional LSTM
+        h = self.zeros(self.num_layers * 2, batch_size, self.hidden_size // 2)
+        c = self.zeros(self.num_layers * 2, batch_size, self.hidden_size // 2)
         return h, c
 
     def forward(self, x: Dict[str, np.ndarray], mask: torch.Tensor):
