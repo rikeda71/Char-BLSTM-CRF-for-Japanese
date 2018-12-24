@@ -8,7 +8,7 @@ with open('LICENSE') as f:
     license = f.read()
 
 setup(
-    name='CBCJ',
+    name='deepjapaner',
     version='1.0.0',
     description='An Implementation of Character based Bidirectional LSTM CRF for Japanese',
     long_description=readme,
@@ -17,7 +17,7 @@ setup(
     install_requires=['torch==1.0.0', 'torchtext', 'numpy', 'matplotlib', 'seqeval'],
     url='https://github.com/s14t284/Char-BLSTM-CRF-for-Japanese',
     license=license,
-    packages=['src'],
+    packages=['deepjapaner'],
     python_requires='>=3.5',
     test_suite='tests',
 )

@@ -23,7 +23,7 @@ pip install git+https://github.com/s14t284/Char-BLSTM-CRF-for-Japanese#egg=CBCJ
 
 ## Usage
 
-I prepared sample codes. Please see [exec\_script](https://github.com/s14t284/Char-BLSTM-CRF-for-Japanese/brob/master/exec_script) or [exec\_sample.ipynb](https://github.com/s14t284/Char-BLSTM-CRF-for-Japanese/brob/master/exec_sample.pynb) .
+I prepared sample codes. Please see [exec\_script](https://github.com/s14t284/Char-BLSTM-CRF-for-Japanese/blob/master/exec_script.py) or [exec\_sample.ipynb](https://github.com/s14t284/Char-BLSTM-CRF-for-Japanese/blob/master/exec_sample.pynb) .
 
 
 ## Reference
