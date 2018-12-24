@@ -2,7 +2,7 @@ from typing import List, Dict, Tuple
 import torch
 import torch.nn as nn
 import numpy as np
-from TorchCRF.crf import CRF
+from TorchCRF import CRF
 
 
 class BLSTMCRF(nn.Module):
