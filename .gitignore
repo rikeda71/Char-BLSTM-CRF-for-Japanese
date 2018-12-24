@@ -140,3 +140,4 @@ pip-selfcheck.json
 *.pth
 *.txt
 *.png
+.DS_STORE

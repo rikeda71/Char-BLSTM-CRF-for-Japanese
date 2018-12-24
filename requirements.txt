@@ -1,5 +1,8 @@
 numpy==1.15.4
-torch==0.4.1
+torch==1.0.0
 torchtext
+matplotlib
+seqeval
 six
-gensim
+git+https://github.com/s14t284/TorchCRF#egg=TorchCRF
+git+https://github.com/Andolab/miNER#egg=miNER
