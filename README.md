@@ -8,11 +8,17 @@ This library is a library of name entity recognition (NER) for Japanese and repr
 ## Requirements
 
 - python3 (>=3.5)
-- pytorch1.0
+- pytorch 1.0
+- [TorchCRF](https://github.com/s14t284/TorchCRF)
+- [miNER](https://github.com/Andolab/miNER)
 
 ## Installation
 
-    pip install git+https://github.com/s14t284/Char-BLSTM-CRF-for-Japanese#egg=CBCJ
+```shell
+pip install git+https://github.com/s14t284/TorchCRF#egg=TorchCRF
+pip install git+https://github.com/Andolab/miNERegg=miNER
+pip install git+https://github.com/s14t284/Char-BLSTM-CRF-for-Japanese#egg=CBCJ
+```
 
 
 ## Usage

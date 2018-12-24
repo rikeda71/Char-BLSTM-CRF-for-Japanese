@@ -1,10 +1,6 @@
 from setuptools import setup, find_packages
 
 
-def _requires_from_file(filename):
-    return open(filename).read().splitlines()
-
-
 with open('README.md') as f:
     readme = f.read()
 
@@ -18,7 +14,7 @@ setup(
     long_description=readme,
     author='Ryuya Ikeda',
     author_email='rikeda71@gmail.com',
-    install_requires=_requires_from_file('requirements.txt'),
+    install_requires=['torch==1.0.0', 'torchtext', 'numpy', 'matplotlib', 'seqeval'],
     url='https://github.com/s14t284/Char-BLSTM-CRF-for-Japanese',
     license=license,
     packages=['src'],
