@@ -32,7 +32,7 @@ class Dataset():
 
         self.fields = [('char', self.CHAR), ('word', self.WORD), ('label', self.LABEL)]
         self.dataset = datasets.SequenceTaggingDataset(path=text_path, fields=self.fields)
-        self.CHAR.build_vocab(self.dataset, vectors=Vectors(wordembed_path))
+        self.CHAR.build_vocab(self.dataset, vectors=Vectors(charembed_path))
         self.WORD.build_vocab(self.dataset, vectors=Vectors(wordembed_path))
         self.LABEL.build_vocab(self.dataset)
 

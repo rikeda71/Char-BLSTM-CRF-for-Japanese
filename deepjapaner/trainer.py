@@ -114,8 +114,8 @@ class Trainer():
         # テストセットに対して，ラベルの予測を行う
         for i, data in enumerate(iterator):
             with torch.no_grad():
-                word = self.dataset.WORD.vocab.vectors[data.word].to(trainer.device)
-                char = self.dataset.CHAR.vocab.vectors[data.char].to(trainer.device)
+                word = self.dataset.WORD.vocab.vectors[data.word].to(self.device)
+                char = self.dataset.CHAR.vocab.vectors[data.char].to(self.device)
                 mask = data.word != 1
                 mask = mask.float().to(self.device)
                 x = {'word': word, 'char': char}
