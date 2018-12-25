@@ -9,7 +9,7 @@ class Trainer():
 
     def __init__(self, optimizer,
                  hidden_size: int, batch_size: int,
-                 pad_idx: int, wordemb_path: str, charemb_path: str,
+                 wordemb_path: str, charemb_path: str,
                  train_path: str, test_path: str,
                  dropout_rate: float=0.0, learning_rate: float=1e-3,
                  save_path: str='weight.pth'):
@@ -18,7 +18,6 @@ class Trainer():
         :param optimizer: optimizer method
         :param hidden_size: size of hidden matrix
         :param batch_size: size of batch
-        :param pad_idx: index of padding
         :param wordemb_path: path of word embedding
         :param charemb_path: path of character embedding
         :param train_path: path of train dataset
@@ -34,7 +33,7 @@ class Trainer():
         self.save_path = save_path
         dim_sizes = self.dataset.return_embedding_dim()
         num_labels = self.dataset.return_num_label_kind()
-        self.model = BLSTMCRF(num_labels, hidden_size, dropout_rate, pad_idx, dim_sizes['word'], dim_sizes['char'])
+        self.model = BLSTMCRF(num_labels, hidden_size, dropout_rate, dim_sizes['word'], dim_sizes['char'])
         self.optimizer = optimizer(params=self.model.parameters(), lr=learning_rate)
 
     def train(self, epoch_size: int=5) -> None:

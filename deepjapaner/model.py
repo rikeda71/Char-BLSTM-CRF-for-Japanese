@@ -9,20 +9,18 @@ class BLSTMCRF(nn.Module):
     CUDA = torch.cuda.is_available()
 
     def __init__(self, num_labels: int, hidden_size: int,
-                 dropout_rate: float, pad_idx: int,
-                 wordemb_dim: int, charemb_dim: int):
+                 dropout_rate: float, wordemb_dim: int, charemb_dim: int):
         """
 
         :param num_labels: number of label
         :param hidden_size: size of hidden state
         :param dropout_rate: dropout rate (0.0 <= dropout_rate < 1.0)
-        :param pad_idx: index of padding character in word
         :param wordemb_dim: dimension of word embedding
         :param charemb_dim: dimension of character embedding
         """
 
         super().__init__()
-        self.blstm = BLSTM(num_labels, hidden_size, dropout_rate, pad_idx, wordemb_dim, charemb_dim)
+        self.blstm = BLSTM(num_labels, hidden_size, dropout_rate, wordemb_dim, charemb_dim)
         self.crf = CRF(num_labels)
         self = self.cuda() if BLSTM.CUDA else self
 
@@ -67,14 +65,12 @@ class BLSTM(nn.Module):
     CUDA = torch.cuda.is_available()
 
     def __init__(self, num_labels: int, hidden_size: int,
-                 dropout_rate: int, pad_idx: int,
-                 wordemb_dim: int, charemb_dim: int):
+                 dropout_rate: int, wordemb_dim: int, charemb_dim: int):
         """
 
         :param num_labels: number of label
         :param hidden_size: size of hidden state
         :param dropout_rate: dropout rate (0.0 <= dropout_rate < 1.0)
-        :param pad_idx: index of padding character in word
         :param wordemb_dim: dimension of word embedding
         :param charemb_dim: dimension of character embedding
         """
