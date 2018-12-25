@@ -33,7 +33,8 @@ class Trainer():
         self.save_path = save_path
         dim_sizes = self.dataset.return_embedding_dim()
         num_labels = self.dataset.return_num_label_kind()
-        self.model = BLSTMCRF(num_labels, hidden_size, dropout_rate, dim_sizes['word'], dim_sizes['char'])
+        self.device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+        self.model = BLSTMCRF(num_labels, hidden_size, dropout_rate, dim_sizes['word'], dim_sizes['char']).to(self.device)
         self.optimizer = optimizer(params=self.model.parameters(), lr=learning_rate)
 
     def train(self, epoch_size: int=5) -> None:
@@ -56,13 +57,13 @@ class Trainer():
                 # maskを作成
                 # making mask
                 mask = data.word != 1
-                mask = mask.float()
+                mask = mask.float().to(self.device)
 
                 # バッチ内に含まれる文の中の文字と文字を含む単語，文字に対しての固有表現ラベルを用意
                 # prepare words and characters in sentence, and labels for characters
-                word = self.dataset.WORD.vocab.vectors[data.word]
-                char = self.dataset.CHAR.vocab.vectors[data.char]
-                labels = data.label
+                word = self.dataset.WORD.vocab.vectors[data.word].to(self.device)
+                char = self.dataset.CHAR.vocab.vectors[data.char].to(self.device)
+                labels = data.label.to(self.device)
                 x = {'word': word, 'char': char}
 
                 # training
@@ -113,10 +114,10 @@ class Trainer():
         # テストセットに対して，ラベルの予測を行う
         for i, data in enumerate(iterator):
             with torch.no_grad():
-                word = self.dataset.WORD.vocab.vectors[data.word]
-                char = self.dataset.CHAR.vocab.vectors[data.char]
+                word = self.dataset.WORD.vocab.vectors[data.word].to(trainer.device)
+                char = self.dataset.CHAR.vocab.vectors[data.char].to(trainer.device)
                 mask = data.word != 1
-                mask = mask.float()
+                mask = mask.float().to(self.device)
                 x = {'word': word, 'char': char}
                 decode = self.model.decode(x, mask)
 

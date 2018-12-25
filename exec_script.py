@@ -10,8 +10,8 @@ t = Trainer(optimizer=torch.optim.Adam, hidden_size=300, batch_size=32,
             train_path='train.txt', test_path='test.txt', dropout_rate=0.5)
 now = time()
 t.train(10)
-print(str(time() - now) + "秒")
 t.model.load('weight.pth')
+print(str(time() - now) + "秒")
 
 reporter = Reporter(t)
 reporter.all_report()
