@@ -13,9 +13,7 @@ class Reporter():
         self._answers = []
         self._predicts = []
         self._sentences = []
-        self._predict_to_testset(trainer)
         self._correct_known_words(trainer)
-        self.miner = Miner(self._answers, self._predicts, self._sentences, self._known_words)
 
     def all_report(self):
         """
@@ -53,29 +51,55 @@ class Reporter():
 
         return self.miner.unknown_only_report(print_)
 
-    def _predict_to_testset(self, trainer):
+    def predict_to_devset(self, trainer):
         """
-        predicting labels of test dataset
+        predicting labels of dev dataset
         :param trainer: Neural Network Model
         """
 
-        iterator = trainer.test.return_batch(trainer.batch_size)
+        iterator = trainer.devset.return_batch(trainer.batch_size)
         for i, data in enumerate(iterator):
             with torch.no_grad():
-                word = trainer.test.WORD.vocab.vectors[data.word].to(trainer.device)
-                char = trainer.test.CHAR.vocab.vectors[data.char].to(trainer.device)
+                word = trainer.devset.WORD.vocab.vectors[data.word].to(trainer.device)
+                char = trainer.devset.CHAR.vocab.vectors[data.char].to(trainer.device)
                 mask = data.word != 1
                 mask = mask.float().to(trainer.device)
                 x = {'word': word, 'char': char}
                 decode = trainer.model.decode(x, mask)
 
                 for pred, ans, c in zip(decode, data.label, data.char):
-                    self._answers.append([trainer.test.LABEL.vocab.itos[i]
+                    self._answers.append([trainer.devset.LABEL.vocab.itos[i]
                                           for i in ans[:len(pred)]])
-                    self._predicts.append([trainer.test.LABEL.vocab.itos[i]
+                    self._predicts.append([trainer.devset.LABEL.vocab.itos[i]
                                            for i in pred])
-                    self._sentences.append([trainer.test.CHAR.vocab.itos[i]
+                    self._sentences.append([trainer.devset.CHAR.vocab.itos[i]
                                             for i in c[:len(pred)]])
+        self.miner = Miner(self._answers, self._predicts, self._sentences, self._known_words)
+
+    def predict_to_testset(self, trainer):
+        """
+        predicting labels of test dataset
+        :param trainer: Neural Network Model
+        """
+
+        iterator = trainer.testset.return_batch(trainer.batch_size)
+        for i, data in enumerate(iterator):
+            with torch.no_grad():
+                word = trainer.testset.WORD.vocab.vectors[data.word].to(trainer.device)
+                char = trainer.testset.CHAR.vocab.vectors[data.char].to(trainer.device)
+                mask = data.word != 1
+                mask = mask.float().to(trainer.device)
+                x = {'word': word, 'char': char}
+                decode = trainer.model.decode(x, mask)
+
+                for pred, ans, c in zip(decode, data.label, data.char):
+                    self._answers.append([trainer.testset.LABEL.vocab.itos[i]
+                                          for i in ans[:len(pred)]])
+                    self._predicts.append([trainer.testset.LABEL.vocab.itos[i]
+                                           for i in pred])
+                    self._sentences.append([trainer.testset.CHAR.vocab.itos[i]
+                                            for i in c[:len(pred)]])
+        self.miner = Miner(self._answers, self._predicts, self._sentences, self._known_words)
 
     def _correct_known_words(self, trainer):
         """
@@ -83,22 +107,22 @@ class Reporter():
         :param trainer: Neural Network Model
         """
 
-        train_iterator = trainer.dataset.return_batch(trainer.batch_size)
+        train_iterator = trainer.trainset.return_batch(trainer.batch_size)
         known_answer = []
         known_sentence = []
         for i, data in enumerate(train_iterator):
             with torch.no_grad():
-                word = trainer.dataset.WORD.vocab.vectors[data.word].to(trainer.device)
-                char = trainer.dataset.CHAR.vocab.vectors[data.char].to(trainer.device)
+                word = trainer.trainset.WORD.vocab.vectors[data.word].to(trainer.device)
+                char = trainer.trainset.CHAR.vocab.vectors[data.char].to(trainer.device)
                 mask = data.word != 1
                 mask = mask.float().to(trainer.device)
                 x = {'word': word, 'char': char}
                 decode = trainer.model.decode(x, mask)
 
                 for pred, ans, c in zip(decode, data.label, data.char):
-                    known_answer.append([trainer.dataset.LABEL.vocab.itos[i]
+                    known_answer.append([trainer.trainset.LABEL.vocab.itos[i]
                                          for i in ans[:len(pred)]])
-                    known_sentence.append([trainer.dataset.CHAR.vocab.itos[i]
+                    known_sentence.append([trainer.trainset.CHAR.vocab.itos[i]
                                            for i in c[:len(pred)]])
 
         miner = Miner(known_answer, [['']], known_sentence, {'PRO': [], 'SHO': []})
