@@ -12,6 +12,7 @@ This library is a library of name entity recognition (NER) for Japanese and repr
 - [TorchCRF](https://github.com/s14t284/TorchCRF)
 - [miNER](https://github.com/Andolab/miNER)
 
+
 ## Installation
 
 ```shell
@@ -27,26 +28,24 @@ I prepared sample codes. Please see [exec\_script.py](https://github.com/s14t284
 
 ### Class parameter description
 
-- Trainer(optiminzer, hidden\_size, batch\_size, wordemb\_path, charemb\_path, train\_path, test\_path, dropout\_rate, learning\_rate, save\_path)
+- Experiment(optiminzer, wordemb\_path, charemb\_path, train\_path, test\_path, dropout\_rate,
+             epoch\_size, batch\_size, hidden\_size, learning\_rate, clip\_grad\_num, save\_path)
 
 |  parameter  |  description  |
 | ---- | ---- |
 |  optimizer  |  setting pytorch optimizer method(torch.optim.\*). For example, torch.optim.Adam, torch.optim.SGD, etc...  |
-|  hidden\_size  |  hidden layer size of Bidirectional LSTM.  |
-|  batch\_size  |  batch size using training Neural Network. |
 |  wordemb\_path  |  file path of word embedding (.txt) |
 |  charemb\_path  |  file path of char embedding (.txt)  |
 |  train\_path  |  file path of train dataset  |
 |  test\_path  |  file path of test dataset  |
-|  dropout\_rate  |  dropout rate (0 <= rate < 1). defaut 0.0  |
+|  dev\_path  |  file path of develop dataset  |
+|  epoch\_size  |  epoch size using training Neural Network. |
+|  batch\_size  |  batch size using training Neural Network. |
+|  hidden\_size  |  hidden layer size of Bidirectional LSTM.  |
+|  dropout\_rate  |  dropout rate (0 <= rate < 1). default 0.0  |
 |  learning\_rate  |  learning rate. default 1e-3  |
+|  clip\_grad\_num  |  using gradient clipping. default 5.0 |
 |  save\_path  |  model save path (.pth)  |
-
-- Reporter(trainer)
-
-|  parameter  |  description  |
-| ---- | ---- |
-|  trainer  |  setting Trainer() class  |
 
 
 ## Reference

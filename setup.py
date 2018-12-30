@@ -1,4 +1,4 @@
-from setuptools import setup, find_packages
+from setuptools import setup
 
 
 with open('README.md') as f:
@@ -14,7 +14,7 @@ setup(
     long_description=readme,
     author='Ryuya Ikeda',
     author_email='rikeda71@gmail.com',
-    install_requires=['torch==1.0.0', 'torchtext', 'numpy', 'matplotlib', 'seqeval'],
+    install_requires=['torch==1.0.0', 'torchtext', 'numpy', 'matplotlib'],
     url='https://github.com/s14t284/Char-BLSTM-CRF-for-Japanese',
     license=license,
     packages=['deepjapaner'],
