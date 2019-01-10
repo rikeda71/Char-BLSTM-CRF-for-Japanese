@@ -13,7 +13,6 @@ class Experimenter():
                  hidden_size: int, dropout_rate: float = 0.0,
                  learning_rate: float = 1e-3, clip_grad_num: float = 5.0,
                  save_path: str = 'weight.pth'):
-
         """
         :param optimizer: optimizer method
         :param wordemb_path: path of word embedding
@@ -37,7 +36,6 @@ class Experimenter():
                                dropout_rate, learning_rate,
                                clip_grad_num, save_path)
 
-        self.reporter = Reporter(self.trainer)
         self.epoch_size = epoch_size
 
     def run(self, label: str, target: str = 'all',
@@ -64,13 +62,14 @@ class Experimenter():
         for epoch in range(self.epoch_size):
             # training
             loss = self.trainer.train()
-            self.reporter.predict_to_devset(self.trainer)
+            reporter = Reporter(self.trainer)
+            reporter.predict_to_devset(self.trainer)
             if target == 'all':
-                score = self.reporter.default_report(False)[label][measured_val]
+                score = reporter.default_report(False)[label][measured_val]
             elif target == 'known':
-                score = self.reporter.known_report(False)[label][measured_val]
+                score = reporter.known_report(False)[label][measured_val]
             elif target == 'unknown':
-                score = self.reporter.unknown_report(False)[label][measured_val]
+                score = reporter.unknown_report(False)[label][measured_val]
             # 損失とF値を保持
             # save loss and F-measure
             losses.append(loss)
@@ -85,6 +84,7 @@ class Experimenter():
 
         self.trainer.model.load(self.trainer.save_path)
         # 学習結果の表示
+        self.reporter = Reporter(self.trainer)
         self.reporter.predict_to_testset(self.trainer)
         self.reporter.all_report()
 
@@ -100,3 +100,7 @@ class Experimenter():
         ax1.set_ylabel('loss')
         ax2.set_ylabel('F-measure')
         plt.savefig('result.png')
+
+        return {'all': self.reporter.default_report(False),
+                'unknown': self.reporter.unknown_report(False),
+                'known': self.reporter.known_report(False)}
