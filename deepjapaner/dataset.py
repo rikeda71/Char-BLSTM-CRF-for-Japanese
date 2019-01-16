@@ -6,12 +6,9 @@ from torchtext.vocab import Vectors
 
 class Dataset():
 
-    WORD = data.Field(batch_first=True)
-    CHAR = data.Field(batch_first=True)
-    LABEL = data.Field(batch_first=True)
-
     def __init__(self, text_path: str,
-                 wordembed_path: str, charembed_path: str):
+                 wordembed_path: str, charembed_path: str,
+                 device: str):
         """
         The form of dataset
         想定しているデータセットの形
@@ -30,11 +27,16 @@ class Dataset():
         た  た  O
         """
 
+        self.WORD = data.Field(batch_first=True)
+        self.CHAR = data.Field(batch_first=True)
+        self.LABEL = data.Field(batch_first=True)
         self.fields = [('char', self.CHAR), ('word', self.WORD), ('label', self.LABEL)]
-        self.dataset = datasets.SequenceTaggingDataset(path=text_path, fields=self.fields)
+        self.dataset = datasets.SequenceTaggingDataset(path=text_path, fields=self.fields,
+                                                       separator='\t')
         self.CHAR.build_vocab(self.dataset, vectors=Vectors(charembed_path))
         self.WORD.build_vocab(self.dataset, vectors=Vectors(wordembed_path))
         self.LABEL.build_vocab(self.dataset)
+        self.device = device
 
     def return_dataset(self):
         """
@@ -53,6 +55,7 @@ class Dataset():
                                    batch_size=batch_size,
                                    sort=True,
                                    sort_key=lambda x: len(x.char),
+                                   device=torch.device(self.device),
                                    repeat=False)
 
     def return_embedding_dim(self) -> Dict[str, int]:

@@ -27,14 +27,14 @@ class Trainer():
         :param save_path: path of train result
         """
 
-        self.trainset = Dataset(train_path, wordemb_path, charemb_path)
-        self.testset = Dataset(test_path, wordemb_path, charemb_path)
-        self.devset = Dataset(dev_path, wordemb_path, charemb_path)
+        self.device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+        self.trainset = Dataset(train_path, wordemb_path, charemb_path, self.device)
+        self.testset = Dataset(test_path, wordemb_path, charemb_path, self.device)
+        self.devset = Dataset(dev_path, wordemb_path, charemb_path, self.device)
         self.batch_size = batch_size
         self.save_path = save_path
         dim_sizes = self.trainset.return_embedding_dim()
         num_labels = self.trainset.return_num_label_kind()
-        self.device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
         self.model = BLSTMCRF(num_labels, hidden_size, dropout_rate,
                               dim_sizes['word'], dim_sizes['char']).to(self.device)
         self.optimizer = optimizer(params=self.model.parameters(), lr=learning_rate)
