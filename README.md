@@ -24,7 +24,7 @@ pip install git+https://github.com/s14t284/Char-BLSTM-CRF-for-Japanese#egg=deepj
 
 ## Usage
 
-I prepared sample codes. Please see [exec\_script.py](https://github.com/s14t284/Char-BLSTM-CRF-for-Japanese/blob/master/exec_script.py) or [exec\_sample.ipynb](https://github.com/s14t284/Char-BLSTM-CRF-for-Japanese/blob/master/exec_sample.ipynb).
+I prepared sample codes. Please see [train\_sample.py](https://github.com/s14t284/Char-BLSTM-CRF-for-Japanese/blob/master/train_sample.py), [predict\_sample.py](https://github.com/s14t284/Char-BLSTM-CRF-for-Japanese/blob/master/predict_sample.py) or [exec\_sample.ipynb](https://github.com/s14t284/Char-BLSTM-CRF-for-Japanese/blob/master/exec_sample.ipynb).
 
 ### Class parameter description
 
@@ -42,10 +42,29 @@ I prepared sample codes. Please see [exec\_script.py](https://github.com/s14t284
 |  epoch\_size  |  epoch size using training Neural Network. |
 |  batch\_size  |  batch size using training Neural Network. |
 |  hidden\_size  |  hidden layer size of Bidirectional LSTM.  |
-|  dropout\_rate  |  dropout rate (0 <= rate < 1). default 0.0  |
-|  learning\_rate  |  learning rate. default 1e-3  |
-|  clip\_grad\_num  |  using gradient clipping. default 5.0 |
+|  dropout\_rate  |  dropout rate (0 <= rate < 1). \[0.0\]  |
+|  learning\_rate  |  learning rate. \[1e-3\]  |
+|  clip\_grad\_num  |  using gradient clipping. \[5.0\] |
 |  save\_path  |  model save path (.pth)  |
+
+| method | description |
+| ---- | ---- |
+| run(label, target, measured\_value, patience) | execute a Named Entity Recognition experiment. Please give name of named entity label to "label", and give value of int type to "patience". "label" and "patience" are used in early stopping.
+
+
+- ModelAPI(model\_path, train\_path, wordemb\_path, charemb\_path, hidden\_size)
+
+| parameter  |  description  |
+| ---- | ---- |
+| model\_path | trained model file path (.pth) |
+| train\_path | file path used training |
+| wordemb\_path | path of word embedding used training |
+| charemb\_path | path of char embedding used training |
+| hidden\_size | size of hidden layer |
+
+| method | description |
+| ---- | ---- |
+| predict(sentence) | predict Named Entity label for sentence. Please give a Japanese sentence to sentence of argument parameter
 
 
 ## Reference

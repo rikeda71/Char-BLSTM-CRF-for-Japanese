@@ -7,7 +7,7 @@ from torchtext.vocab import Vectors
 class Dataset():
 
     def __init__(self, text_path: str,
-                 wordembed_path: str, charembed_path: str,
+                 wordemb_path: str, charemb_path: str,
                  device: str):
         """
         The form of dataset
@@ -33,8 +33,8 @@ class Dataset():
         self.fields = [('char', self.CHAR), ('word', self.WORD), ('label', self.LABEL)]
         self.dataset = datasets.SequenceTaggingDataset(path=text_path, fields=self.fields,
                                                        separator='\t')
-        self.CHAR.build_vocab(self.dataset, vectors=Vectors(charembed_path))
-        self.WORD.build_vocab(self.dataset, vectors=Vectors(wordembed_path))
+        self.CHAR.build_vocab(self.dataset, vectors=Vectors(charemb_path))
+        self.WORD.build_vocab(self.dataset, vectors=Vectors(wordemb_path))
         self.LABEL.build_vocab(self.dataset)
         self.device = device
 
