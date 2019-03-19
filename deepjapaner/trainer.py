@@ -10,8 +10,8 @@ class Trainer():
                  train_path: str, test_path: str, dev_path: str,
                  batch_size: int, hidden_size: int,
                  dropout_rate: float = 0.0, learning_rate: float = 1e-3,
-                 clip_grad_num: float = 5.0,
-                 save_path: str = 'weight.pth'):
+                 clip_grad_num: float = 5.0, save_path: str = 'weight.pth',
+                 emb_requires_grad: bool = True):
         """
         :param optimizer: optimizer method
         :param wordemb_path: path of word embedding
@@ -25,20 +25,29 @@ class Trainer():
         :param learning_rate: rate of train
         :param clip_grad_num: using gradient clipping
         :param save_path: path of train result
+        :param emb_requires_grad: if this param is True,
+                                  'requires_grad' of word and char emb is True
         """
 
-        self.device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
-        self.trainset = Dataset(train_path, wordemb_path, charemb_path, self.device)
-        self.testset = Dataset(test_path, wordemb_path, charemb_path, self.device)
-        self.devset = Dataset(dev_path, wordemb_path, charemb_path, self.device)
+        self.device = torch.device('cuda' if torch.cuda.is_available()
+                                   else 'cpu')
+        self.trainset = Dataset(train_path, wordemb_path,
+                                charemb_path, self.device)
+        self.testset = Dataset(test_path, wordemb_path,
+                               charemb_path, self.device)
+        self.devset = Dataset(dev_path, wordemb_path,
+                              charemb_path, self.device)
         self.batch_size = batch_size
         self.save_path = save_path
         dim_sizes = self.trainset.return_embedding_dim()
         num_labels = self.trainset.return_num_label_kind()
         self.model = BLSTMCRF(num_labels, hidden_size, dropout_rate,
-                              dim_sizes['word'], dim_sizes['char']).to(self.device)
-        self.optimizer = optimizer(params=self.model.parameters(), lr=learning_rate)
+                              dim_sizes['word'], dim_sizes['char']
+                              ).to(self.device)
+        self.optimizer = optimizer(params=self.model.parameters(),
+                                   lr=learning_rate)
         self.clip_grad_num = clip_grad_num
+        self.emb_requires_grad = emb_requires_grad
         self.learn_num = 0
         self.epoch_num = 0
 
@@ -60,9 +69,11 @@ class Trainer():
             mask = mask.float().to(self.device)
 
             # バッチ内に含まれる文の中の文字と文字を含む単語，文字に対しての固有表現ラベルを用意
-            # prepare words and characters in sentence, and labels for characters
+            # prepare words and chars in sentence, and labels for chars
             word = self.trainset.WORD.vocab.vectors[data.word].to(self.device)
             char = self.trainset.CHAR.vocab.vectors[data.char].to(self.device)
+            word.requires_grad = self.emb_requires_grad
+            char.requires_grad = self.emb_requires_grad
             labels = data.label.to(self.device)
             x = {'word': word, 'char': char}
 

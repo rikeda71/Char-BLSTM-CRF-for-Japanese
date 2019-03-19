@@ -12,7 +12,8 @@ class Experimenter():
                  epoch_size: int, batch_size: int,
                  hidden_size: int, dropout_rate: float = 0.0,
                  learning_rate: float = 1e-3, clip_grad_num: float = 5.0,
-                 save_path: str = 'weight.pth'):
+                 save_path: str = 'weight.pth',
+                 emb_requires_grad: bool = True):
         """
         :param optimizer: optimizer method
         :param wordemb_path: path of word embedding
@@ -27,6 +28,8 @@ class Experimenter():
         :param learning_rate: rate of train
         :param clip_grad_num: using gradient clipping
         :param save_path: path of train result
+        :param emb_requires_grad: if this param is True,
+                                  'requires_grad' of word and char emb is True
         """
 
         self.trainer = Trainer(optimizer,
@@ -34,7 +37,7 @@ class Experimenter():
                                train_path, test_path, dev_path,
                                batch_size, hidden_size,
                                dropout_rate, learning_rate,
-                               clip_grad_num, save_path)
+                               clip_grad_num, save_path, emb_requires_grad)
 
         self.epoch_size = epoch_size
 
@@ -42,11 +45,13 @@ class Experimenter():
             measured_val: str = 'f1_score', patience: int = 3):
         """
         execute training method.
-                argument values are used by early stopping and plotting the graph.
+                argument values are used by early stopping
+                and plotting the graph.
         :param label: NER label (PSN, LOC, PRO).
         :param target: named entity target (all, known, or unknown).
-        :param measured_val: kind of measured value (precision, recall, or f1).
-        :param patience: using early stopping. if patience <= 0, don't exec early stopping
+        :param measured_val: kind of measure value (precision, recall, or f1).
+        :param patience: using early stopping.
+                         if patience <= 0, don't exec early stopping
         """
 
         assert target in ['all', 'known', 'unknown'],\
@@ -94,8 +99,10 @@ class Experimenter():
         ax2 = ax1.twinx()
         ax1.plot(range(len(losses)), losses, color="red")
         ax2.plot(range(len(scores)), scores, color="blue")
-        ax1.legend(bbox_to_anchor=(0.9, 0.5), loc='upper right', borderaxespad=0.5, labels=['loss'], fontsize=10)
-        ax2.legend(bbox_to_anchor=(0.9, 0.6), loc='upper right', borderaxespad=0.5, labels=['score'], fontsize=10)
+        ax1.legend(bbox_to_anchor=(0.9, 0.5), loc='upper right',
+                   borderaxespad=0.5, labels=['loss'], fontsize=10)
+        ax2.legend(bbox_to_anchor=(0.9, 0.6), loc='upper right',
+                   borderaxespad=0.5, labels=['score'], fontsize=10)
         plt.xlabel('epoch')
         ax1.set_ylabel('loss')
         ax2.set_ylabel('F-measure')
