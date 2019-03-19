@@ -20,15 +20,20 @@ class BLSTMCRF(nn.Module):
         """
 
         super().__init__()
-        self.blstm = BLSTM(num_labels, hidden_size, dropout_rate, wordemb_dim, charemb_dim)
+        self.blstm = BLSTM(num_labels, hidden_size, dropout_rate,
+                           wordemb_dim, charemb_dim)
         self.crf = CRF(num_labels)
         self = self.cuda() if BLSTM.CUDA else self
 
-    def forward(self, x: Dict[str, torch.Tensor], y: torch.Tensor, mask: torch.Tensor) -> torch.Tensor:
+    def forward(self, x: Dict[str, torch.Tensor], y: torch.Tensor,
+                mask: torch.Tensor) -> torch.Tensor:
         """
 
         :param x: word and character embedding
-                   {'word': embedding of word including character, 'char': character embedding}
+                   {
+                   'word': embedding of word including character,
+                    'char': character embedding
+                    }
         :param y: labels of sequence in batch
         :param mask: masking of sequence (1 or 0)
         :return: score of Bidirectional LSTM CRF forward
@@ -39,11 +44,15 @@ class BLSTMCRF(nn.Module):
         score = self.crf.forward(h, y, mask)
         return -torch.mean(score)
 
-    def decode(self, x: Dict[str, torch.Tensor], mask: torch.Tensor) -> List[int]:
+    def decode(self, x: Dict[str, torch.Tensor], mask: torch.Tensor) \
+            -> List[int]:
         """
 
         :param x: word and character embedding
-                   {'word': embedding of word including character, 'char': character embedding}
+                   {
+                   'word': embedding of word including character,
+                   'char': character embedding
+                   }
         :return: labels of x
         """
 
@@ -109,7 +118,10 @@ class BLSTM(nn.Module):
         """
 
         :param x: word and character embedding
-                   {'word': embedding of word including character, 'char': character embedding}
+                   {
+                   'word': embedding of word including character,
+                   'char': character embedding
+                   }
                    (batch_size, sequence_len, embedding_size)
         :param mask: masking of sequence (1 or 0)
         :return: score of LSTM forward
@@ -118,7 +130,8 @@ class BLSTM(nn.Module):
         batch_size = x['word'].shape[0]
         self.hidden = self.init_hidden(batch_size)
         x = torch.cat((x['word'], x['char']), 2)
-        x = nn.utils.rnn.pack_padded_sequence(x, mask.sum(1).int(), batch_first=True)
+        x = nn.utils.rnn.pack_padded_sequence(x, mask.sum(1).int(),
+                                              batch_first=True)
         h, _ = self.lstm(x, self.hidden)
         h, _ = torch.nn.utils.rnn.pad_packed_sequence(h, batch_first=True)
         h = self.out(h)

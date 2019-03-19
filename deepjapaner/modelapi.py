@@ -1,5 +1,4 @@
 from .model import BLSTMCRF
-from .dataset import Dataset
 import torch
 from torchtext import data, datasets
 from torchtext.vocab import Vectors
@@ -23,9 +22,13 @@ class ModelAPI():
         self.WORD = data.Field(batch_first=True)
         self.CHAR = data.Field(batch_first=True)
         self.LABEL = data.Field(batch_first=True)
-        self.fields = [('char', self.CHAR), ('word', self.WORD), ('label', self.LABEL)]
-        self.dataset = datasets.SequenceTaggingDataset(path=train_path, fields=self.fields,
-                                                       separator='\t')
+        self.fields = [
+            ('char', self.CHAR), ('word', self.WORD), ('label', self.LABEL)
+        ]
+        self.dataset = datasets.SequenceTaggingDataset(path=train_path,
+                                                       fields=self.fields,
+                                                       separator='\t'
+                                                       )
         self.CHAR.build_vocab(self.dataset, vectors=Vectors(charemb_path))
         self.WORD.build_vocab(self.dataset, vectors=Vectors(wordemb_path))
         self.LABEL.build_vocab(self.dataset)

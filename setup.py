@@ -9,8 +9,9 @@ with open('LICENSE') as f:
 
 setup(
     name='deepjapaner',
-    version='1.0.0',
-    description='An Implementation of Character based Bidirectional LSTM CRF for Japanese',
+    version='1.0.1',
+    description='An Implementation of Character based Bidirectional\
+                 LSTM CRF for Japanese',
     long_description=readme,
     author='Ryuya Ikeda',
     author_email='rikeda71@gmail.com',

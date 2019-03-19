@@ -30,9 +30,13 @@ class Dataset():
         self.WORD = data.Field(batch_first=True)
         self.CHAR = data.Field(batch_first=True)
         self.LABEL = data.Field(batch_first=True)
-        self.fields = [('char', self.CHAR), ('word', self.WORD), ('label', self.LABEL)]
-        self.dataset = datasets.SequenceTaggingDataset(path=text_path, fields=self.fields,
-                                                       separator='\t')
+        self.fields = [('char', self.CHAR), ('word', self.WORD),
+                       ('label', self.LABEL)]
+        self.dataset = datasets.SequenceTaggingDataset(
+            path=text_path,
+            fields=self.fields,
+            separator='\t'
+        )
         self.CHAR.build_vocab(self.dataset, vectors=Vectors(charemb_path))
         self.WORD.build_vocab(self.dataset, vectors=Vectors(wordemb_path))
         self.LABEL.build_vocab(self.dataset)
@@ -60,7 +64,8 @@ class Dataset():
 
     def return_embedding_dim(self) -> Dict[str, int]:
         """
-        return size of embedding dimension (word embedding dimension and char embedding dimension)
+        return size of embedding dimension
+        (word embedding dimension and char embedding dimension)
         """
 
         char_dim = self.CHAR.vocab.vectors.shape[1]
