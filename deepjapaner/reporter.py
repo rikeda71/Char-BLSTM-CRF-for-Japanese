@@ -60,11 +60,11 @@ class Reporter():
         """
 
         iterator = trainer.devset.return_batch(trainer.batch_size)
-        vecs = trainer.testset.WORD.vocab.vectors
+        vecs = trainer.devset
         for i, data in enumerate(iterator):
             with torch.no_grad():
-                word = vecs[data.word].to(trainer.device)
-                char = vecs[data.char].to(trainer.device)
+                word = vecs.WORD.vocab.vectors[data.word].to(trainer.device)
+                char = vecs.CHAR.vocab.vectors[data.char].to(trainer.device)
                 mask = data.word != 1
                 mask = mask.float().to(trainer.device)
                 x = {'word': word, 'char': char}
@@ -87,11 +87,11 @@ class Reporter():
         """
 
         iterator = trainer.testset.return_batch(trainer.batch_size)
-        vecs = trainer.testset.WORD.vocab.vectors
+        vecs = trainer.testset
         for i, data in enumerate(iterator):
             with torch.no_grad():
-                word = vecs[data.word].to(trainer.device)
-                char = vecs[data.char].to(trainer.device)
+                word = vecs.WORD.vocab.vectors[data.word].to(trainer.device)
+                char = vecs.CHAR.vocab.vectors[data.char].to(trainer.device)
                 mask = data.word != 1
                 mask = mask.float().to(trainer.device)
                 x = {'word': word, 'char': char}
@@ -114,13 +114,13 @@ class Reporter():
         """
 
         train_iterator = trainer.trainset.return_batch(trainer.batch_size)
-        vecs = trainer.testset.WORD.vocab.vectors
+        vecs = trainer.trainset
         known_answer = []
         known_sentence = []
         for i, data in enumerate(train_iterator):
             with torch.no_grad():
-                word = vecs[data.word].to(trainer.device)
-                char = vecs[data.char].to(trainer.device)
+                word = vecs.WORD.vocab.vectors[data.word].to(trainer.device)
+                char = vecs.CHAR.vocab.vectors[data.char].to(trainer.device)
                 mask = data.word != 1
                 mask = mask.float().to(trainer.device)
                 x = {'word': word, 'char': char}
