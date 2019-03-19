@@ -33,7 +33,7 @@ I prepared sample codes. Please see [train\_sample.py](https://github.com/s14t28
 
 |  parameter  |  description  |
 | ---- | ---- |
-|  optimizer  |  setting pytorch optimizer method(torch.optim.\*). For example, torch.optim.Adam, torch.optim.SGD, etc...  |
+|  optimizer  |  setting pytorch optimizer method(torch.optim.\*). For example, torch.optim.Adam, torch.optim.SGD|
 |  wordemb\_path  |  file path of word embedding (.txt) |
 |  charemb\_path  |  file path of char embedding (.txt)  |
 |  train\_path  |  file path of train dataset  |
