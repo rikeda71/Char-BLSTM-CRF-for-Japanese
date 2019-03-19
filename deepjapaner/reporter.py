@@ -1,6 +1,6 @@
 import torch
 from miner import Miner
-from typing import List, Dict
+from typing import Dict
 
 
 class Reporter():
@@ -27,7 +27,8 @@ class Reporter():
         print('\nknown')
         self.known_report()
 
-    def default_report(self, print_: bool=True) -> Dict[str, Dict[str, float]]:
+    def default_report(self, print_: bool = True) \
+            -> Dict[str, Dict[str, float]]:
         """
         return a report of named entity recognition experiment
         :param print_: if True, showing a report in the console
@@ -35,7 +36,7 @@ class Reporter():
 
         return self.miner.default_report(print_)
 
-    def known_report(self, print_: bool=True) -> Dict[str, Dict[str, float]]:
+    def known_report(self, print_: bool = True) -> Dict[str, Dict[str, float]]:
         """
         return a report of known named entity recognition experiment
         :param print_: if True, showing a report in the console
@@ -43,7 +44,8 @@ class Reporter():
 
         return self.miner.known_only_report(print_)
 
-    def unknown_report(self, print_: bool=True) -> Dict[str, Dict[str, float]]:
+    def unknown_report(self, print_: bool = True) \
+            -> Dict[str, Dict[str, float]]:
         """
         return a report of unknown named entity recognition experiment
         :param print_: if True, showing a report in the console
@@ -58,10 +60,11 @@ class Reporter():
         """
 
         iterator = trainer.devset.return_batch(trainer.batch_size)
+        vecs = trainer.testset.WORD.vocab.vectors
         for i, data in enumerate(iterator):
             with torch.no_grad():
-                word = trainer.devset.WORD.vocab.vectors[data.word].to(trainer.device)
-                char = trainer.devset.CHAR.vocab.vectors[data.char].to(trainer.device)
+                word = vecs[data.word].to(trainer.device)
+                char = vecs[data.char].to(trainer.device)
                 mask = data.word != 1
                 mask = mask.float().to(trainer.device)
                 x = {'word': word, 'char': char}
@@ -74,7 +77,8 @@ class Reporter():
                                            for i in pred])
                     self._sentences.append([trainer.devset.CHAR.vocab.itos[i]
                                             for i in c[:len(pred)]])
-        self.miner = Miner(self._answers, self._predicts, self._sentences, self._known_words)
+        self.miner = Miner(self._answers, self._predicts,
+                           self._sentences, self._known_words)
 
     def predict_to_testset(self, trainer):
         """
@@ -83,10 +87,11 @@ class Reporter():
         """
 
         iterator = trainer.testset.return_batch(trainer.batch_size)
+        vecs = trainer.testset.WORD.vocab.vectors
         for i, data in enumerate(iterator):
             with torch.no_grad():
-                word = trainer.testset.WORD.vocab.vectors[data.word].to(trainer.device)
-                char = trainer.testset.CHAR.vocab.vectors[data.char].to(trainer.device)
+                word = vecs[data.word].to(trainer.device)
+                char = vecs[data.char].to(trainer.device)
                 mask = data.word != 1
                 mask = mask.float().to(trainer.device)
                 x = {'word': word, 'char': char}
@@ -99,7 +104,8 @@ class Reporter():
                                            for i in pred])
                     self._sentences.append([trainer.testset.CHAR.vocab.itos[i]
                                             for i in c[:len(pred)]])
-        self.miner = Miner(self._answers, self._predicts, self._sentences, self._known_words)
+        self.miner = Miner(self._answers, self._predicts,
+                           self._sentences, self._known_words)
 
     def _correct_known_words(self, trainer):
         """
@@ -108,12 +114,13 @@ class Reporter():
         """
 
         train_iterator = trainer.trainset.return_batch(trainer.batch_size)
+        vecs = trainer.testset.WORD.vocab.vectors
         known_answer = []
         known_sentence = []
         for i, data in enumerate(train_iterator):
             with torch.no_grad():
-                word = trainer.trainset.WORD.vocab.vectors[data.word].to(trainer.device)
-                char = trainer.trainset.CHAR.vocab.vectors[data.char].to(trainer.device)
+                word = vecs[data.word].to(trainer.device)
+                char = vecs[data.char].to(trainer.device)
                 mask = data.word != 1
                 mask = mask.float().to(trainer.device)
                 x = {'word': word, 'char': char}
@@ -125,5 +132,6 @@ class Reporter():
                     known_sentence.append([trainer.trainset.CHAR.vocab.itos[i]
                                            for i in c[:len(pred)]])
 
-        miner = Miner(known_answer, [['']], known_sentence, {'PRO': [], 'SHO': []})
+        miner = Miner(known_answer, [['']],
+                      known_sentence, {'PRO': [], 'SHO': []})
         self._known_words = miner.return_answer_named_entities()['unknown']
